@@ -8,14 +8,16 @@ import csv
 class SudokuImage:
     """
     Used for creating a visual representation of a sudoku board
-    Displays 9x9 board with
+    Displays 9x9 board with colored cells
+    Red: incorrect value
+    Green: correct value
+    White: originally given value
     """
     def __init__(self, master, gameBoard, cboard, bboard):
         global frame
         frame = Frame(master, width=600, height=400)
         frame.pack()
 
-        # Heading 'Physics Calculator'
         self.titleLabel = Label(frame, text="Sudoku", borderwidth=2, relief="groove")
         self.titleLabel.grid(row=0, columnspan=10)
         self.CreateGrid(gameBoard)
@@ -38,7 +40,7 @@ class SudokuImage:
             for c in range(1, 10):
                 Label(frame, text=str(board[r-1][c-1]), width=2, height=2, borderwidth=2, relief="solid").grid(row=r, column=c, sticky=E)
 
-# ^^^ Code for GUI representation
+# ^^^ Code for Visual representation ^^^
 
 def FormatBoard(textLetters):
     """
@@ -106,7 +108,6 @@ def FindZero(board):
                 return (row, column)
     return 0
 
-# Remove iterator parameter for no GUI
 def SolveBoard(inputBoard, iterator, visualOn, randomAlgorithm=False, sequence=[1,2,3,4,5,6,7,8,9]):
     """
     Takes an unsolved sudoku board and solves it while keeping track of the number of guesses
@@ -130,10 +131,9 @@ def SolveBoard(inputBoard, iterator, visualOn, randomAlgorithm=False, sequence=[
 
         # Iterating through each number in the sequence
         for number in sequence:
-            # prevIterator += 1
             iterator += 1
             board[row][column] = number
-            if visualOn and iterator % 10 == 0:
+            if visualOn and iterator % 1000 == 0:
                 sudoku.update(board)
                 window.update_idletasks()
                 window.update()
@@ -155,9 +155,6 @@ def SolveBoard(inputBoard, iterator, visualOn, randomAlgorithm=False, sequence=[
     else:
         return [board, iterator]
 
-# Commented out - 1
-
-#global correctBoard, baseBoard
 correctBoard = [
 [4, 1, 9, 6, 5, 8, 3, 2, 7],
 [8, 6, 7, 3, 2, 9, 1, 4, 5],
@@ -169,7 +166,6 @@ correctBoard = [
 [9, 7, 8, 4, 6, 2, 5, 1, 3],
 [3, 2, 1, 5, 9, 7, 8, 6, 4]
 ]
-
 baseBoard = [
 [4, 1, 9, 6, 5, 8, 3, 2, 7],
 [-1, -1, 7, -1, -1, 9, 1, 4, 5],
@@ -181,28 +177,22 @@ baseBoard = [
 [9, 7, 8, 4, -1, -1, 5, -1, -1],
 [3, 2, 1, 5, 9, 7, 8, 6, 4],
 ]
-
-# Opening csv file with puzzles and extracting data
-f = open('sudoku.csv')
-csv_f = csv.reader(f)
-csvData = list(csv_f)
-puzzleTimes = [[], [], []]
-
 g = [
-[0, 0, 9, 0, 5, 0, 3, 0, 7],
-[0, 6, 0, 0, 2, 9, 1, 4, 0],
-[0, 3, 2, 7, 0, 4, 6, 9, 8],
-[1, 4, 5, 0, 8, 0, 7, 0, 2],
-[7, 8, 6, 0, 0, 0, 9, 0, 1],
-[2, 0, 3, 1, 7, 5, 4, 0, 0],
-[0, 5, 4, 8, 3, 1, 2, 0, 9],
-[9, 0, 0, 0, 6, 0, 5, 1, 0],
-[3, 2, 0, 5, 9, 7, 0, 6, 0]
+[0, 0, 0, 0, 0, 0, 0, 0, 0],
+[8, 6, 0, 3, 2, 0, 0, 0, 0],
+[0, 0, 0, 7, 1, 4, 0, 9, 0],
+[1, 0, 5, 0, 8, 0, 7, 0, 0],
+[0, 0, 6, 0, 0, 0, 9, 0, 0],
+[0, 0, 3, 0, 7, 0, 4, 0, 6],
+[0, 5, 0, 8, 0, 1, 0, 0, 0],
+[0, 0, 0, 0, 6, 2, 0, 1, 3],
+[0, 0, 0, 0, 0, 0, 0, 0, 0]
 ]
 global sudoku
 global window
 window = Tk()
 
+# Demonstrating solver with visual
 sudoku = SudokuImage(window, g, correctBoard, baseBoard)
 sudoku.update(g)
 window.update_idletasks()
@@ -213,8 +203,16 @@ sudoku.update(g)
 window.update_idletasks()
 window.update()
 time.sleep(1)
+window.destroy()
+# End of visual
 
-numberPuzzles = 100
+numberPuzzles = 100 # Setting for number of puzzles to solve
+
+# Opening csv file with puzzles and extracting data
+f = open('sudoku.csv')
+csv_f = csv.reader(f)
+csvData = list(csv_f)
+puzzleTimes = [[], [], []]
 
 visual = False # Visual is off for running analysis
 # Running three trials for each type of algorithm
@@ -290,14 +288,10 @@ for i in range(numberPuzzles):
     randAverage[i] = randAverage[i] - origAverage[i]
     freqAverage[i] = freqAverage[i] - origAverage[i]
 
-
-# Commented out - 2
-
 # Creating figure and subplot for graphs
 fig = plt.figure()
 ax = fig.add_subplot()
 
-# Commented out - 3
 rTotal = 0
 fTotal = 0
 for i in range(numberPuzzles):
@@ -319,8 +313,6 @@ plt.ylabel("Number of Guesses")
 plt.xlabel("Number of Solved Puzzles")
 plt.xlim(left=-10, right=numberPuzzles+10)
 
-# Commented out - 4
-
 # Adding legend, title, and grid to figure before showing the visual
 plt.legend()
 plt.title("Difference in Guesses from Sequential vs Number of Puzzles Solved")
@@ -328,214 +320,3 @@ plt.grid()
 
 # Showing plot
 plt.show()
-
-
-
-
-# 1
-"""
-def RandomSolveBoard(inputBoard, iterator):
-    board = [i.copy() for i in inputBoard]
-    findZero = FindZero(board)
-    if findZero != 0:
-        row = findZero[0]
-        column = findZero[1]
-        # iterator = 0
-        randomSequence = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        random.shuffle(randomSequence)
-        for number in randomSequence:
-            # prevIterator += 1
-            iterator += 1
-            board[row][column] = number
-
-            # iterator stuff goes here
-
-            check = CheckBoard(board, findZero)
-            if check == False and number != randomSequence[8]:
-                continue
-            elif check == False and number == randomSequence[8]:
-                return [0, iterator]
-            else:
-                solved, iterator = RandomSolveBoard(board, iterator) # solved, iterator = SolveBoard(board, iterator)
-                if solved == 0 and number != randomSequence[8]:
-                    continue
-                elif solved == 0 and number == randomSequence[8]:
-                    return [0, iterator]
-                else:
-                    return [solved, iterator]
-    else:
-        return [board, iterator]
-
-def FrequencySolveBoard(inputBoard, sequence, iterator):
-    board = [i.copy() for i in inputBoard]
-    findZero = FindZero(board)
-    if findZero != 0:
-        row = findZero[0]
-        column = findZero[1]
-        # iterator = 0
-        for number in sequence:
-            # prevIterator += 1
-            iterator += 1
-            board[row][column] = number
-
-            # iterator stuff goes here
-
-            check = CheckBoard(board, findZero)
-            if check == False and number != sequence[8]:
-                continue
-            elif check == False and number == sequence[8]:
-                return [0, iterator]
-            else:
-                solved, iterator = FrequencySolveBoard(board, sequence, iterator) # solved, iterator = SolveBoard(board, iterator)
-                if solved == 0 and number != sequence[8]:
-                    continue
-                elif solved == 0 and number == sequence[8]:
-                    return [0, iterator]
-                else:
-                    return [solved, iterator]
-    else:
-        return [board, iterator]
-"""
-
-
-# game = [[0, 9, 3, 6, 0, 5, 0, 0, 8],
-#         [0, 1, 0, 0, 9, 0, 5, 0, 6],
-#         [4, 0, 6, 7, 0, 0, 0, 3, 1],
-#         [0, 0, 4, 0, 0, 0, 0, 1, 0],
-#         [9, 0, 1, 0, 0, 0, 3, 0, 2],
-#         [0, 2, 0, 0, 0, 0, 4, 0, 0],
-#         [2, 4, 0, 0, 0, 9, 8, 0, 3],
-#         [6, 0, 5, 0, 8, 0, 0, 9, 0],
-#         [1, 0, 0, 5, 0, 3, 6, 2, 0]]
-#
-# g = [
-# [4, 1, 9, 6, 5, 8, 3, 2, 7],
-# [0, 0, 7, 0, 0, 9, 1, 4, 5],
-# [5, 3, 2, 0, 1, 0, 6, 0, 8],
-# [0, 4, 0, 9, 0, 6, 0, 3, 2],
-# [7, 8, 0, 2, 4, 3, 0, 5, 1],
-# [2, 9, 0, 1, 0, 5, 0, 8, 0],
-# [6, 0, 4, 0, 3, 0, 2, 7, 9],
-# [9, 7, 8, 4, 0, 0, 5, 0, 0],
-# [3, 2, 1, 5, 9, 7, 8, 6, 4],
-# ]
-#
-# global correctBoard, baseBoard
-# correctBoard = [
-# [4, 1, 9, 6, 5, 8, 3, 2, 7],
-# [8, 6, 7, 3, 2, 9, 1, 4, 5],
-# [5, 3, 2, 7, 1, 4, 6, 9, 8],
-# [1, 4, 5, 9, 8, 6, 7, 3, 2],
-# [7, 8, 6, 2, 4, 3, 9, 5, 1],
-# [2, 9, 3, 1, 7, 5, 4, 8, 6],
-# [6, 5, 4, 8, 3, 1, 2, 7, 9],
-# [9, 7, 8, 4, 6, 2, 5, 1, 3],
-# [3, 2, 1, 5, 9, 7, 8, 6, 4]
-# ]
-#
-# baseBoard = [
-# [4, 1, 9, 6, 5, 8, 3, 2, 7],
-# [-1, -1, 7, -1, -1, 9, 1, 4, 5],
-# [5, 3, 2, -1, 1, -1, 6, -1, 8],
-# [-1, 4, -1, 9, -1, 6, -1, 3, 2],
-# [7, 8, -1, 2, 4, 3, -1, 5, 1],
-# [2, 9, -1, 1, -1, 5, -1, 8, -1],
-# [6, -1, 4, -1, 3, -1, 2, 7, 9],
-# [9, 7, 8, 4, -1, -1, 5, -1, -1],
-# [3, 2, 1, 5, 9, 7, 8, 6, 4],
-# ]
-"""
-"""
-
-# window = Tk()
-# sudoku = SudokuImage(window, g)
-# g = SolveBoard(g, 1)[0]
-# sudoku.update(g)
-# window.update_idletasks()
-# window.update()
-
-# g = SolveBoard(g, 0) # SolveBoard(g, 1)[0]
-"""
-for i in g:
-    print(i)
-i = 0
-for j in baseBoard:
-    for k in j:
-        if k != -1:
-            plt.scatter(i+1, k, color="red")
-            i += 1"""
-"""
-plt.ylim(bottom=0, top=50)
-plt.show()
-print(baseBoard)
-
-
-g = [
-	[0, 0, 0, 0, 0, 0, 0, 0, 0],
-	[8, 6, 0, 3, 2, 0, 0, 0, 0],
-	[0, 0, 0, 7, 0, 4, 0, 9, 0],
-	[1, 0, 5, 0, 8, 0, 7, 0, 0],
-	[0, 0, 6, 0, 0, 0, 9, 0, 0],
-	[0, 0, 3, 0, 7, 0, 4, 0, 6],
-	[0, 5, 0, 8, 0, 1, 0, 0, 0],
-	[0, 0, 0, 0, 6, 2, 0, 1, 3],
-	[0, 0, 0, 0, 0, 0, 0, 0, 0]
-	]
-
-correctBoard = [
-[4, 1, 9, 6, 5, 8, 3, 2, 7],
-[8, 6, 7, 3, 2, 9, 1, 4, 5],
-[5, 3, 2, 7, 1, 4, 6, 9, 8],
-[1, 4, 5, 9, 8, 6, 7, 3, 2],
-[7, 8, 6, 2, 4, 3, 9, 5, 1],
-[2, 9, 3, 1, 7, 5, 4, 8, 6],
-[6, 5, 4, 8, 3, 1, 2, 7, 9],
-[9, 7, 8, 4, 6, 2, 5, 1, 3],
-[3, 2, 1, 5, 9, 7, 8, 6, 4]
-]
-"""
-
-# 2
-"""       
-        if i == 0:
-            plt.scatter(j+1, puzzleTimes[i][j], color="blue", s=10)
-        elif i == 1:
-            plt.scatter(j+1, puzzleTimes[i][j], color="red", s=10)
-        elif i == 2:
-            plt.scatter(j + 1, puzzleTimes[i][j], color="green", s=10)
-"""
-
-# 3
-"""
-rTotal = 0
-fTotal = 0
-for i in range(100):
-    rTotal += randAverage[i]
-    fTotal += freqAverage[i]
-
-rTotal /= 100000
-fTotal /= 100000
-
-t1, = ax.plot(xValues, puzzleTimes[0][:100], "bo", label="Sequential", markersize=3)
-t2, = ax.plot(xValues, puzzleTimes[0][100:200], "b^", markersize=3)
-t3, = ax.plot(xValues, puzzleTimes[0][200:], "bs", markersize=3)
-
-ax.plot(xValues, puzzleTimes[1][:100], "ro", label="Random", markersize=3)
-ax.plot(xValues, puzzleTimes[1][100:200], "r^", markersize=3)
-ax.plot(xValues, puzzleTimes[1][200:], "rs", markersize=3)
-
-ax.plot(xValues, puzzleTimes[2][:100], "go", label="Frequency", markersize=3)
-ax.plot(xValues, puzzleTimes[2][100:200], "g^", markersize=3)
-ax.plot(xValues, puzzleTimes[2][200:], "gs", markersize=3)
-"""
-
-# 4
-"""
-legName = ax.legend()
-legT = ax.legend([t1, t2, t3], ["Trial 1", "Trial 2", "Trial 3"], loc="lower right")
-ax.add_artist(legName)
-
-
-print("Random value average:", rTotal)
-print("Frequent value average:", fTotal)
-"""
