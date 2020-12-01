@@ -6,3 +6,5 @@ Sequential Guessing: uses the sequence 1, 2, ... 9
 Random Guessing: uses a randomized sequence consisting of the numbers 1, 2, ... 9
 
 Frequency-Based Guessing: uses a sequence consisting of the numbers 1, 2, ... 9 ordered by the frequency of the numbers in the puzzle (least frequent ... most frequent)
+
+Youtube Link to Final Presentation: https://www.youtube.com/watch?v=yJyceOfw8-8
